@@ -64,11 +64,24 @@ function destroy(id, done) {
       done(err, null);
       return;
       }
+    var cleanData = null;
+    db.collection('jobs')
+      .findOne({_id: new ObjectID(id)}, function callback(err, data){
+        cleanData = {
+          "id": data._id,
+          "company": data.company,
+          "notes": data.notes,
+          "link": data.link,
+          "createTime": data.createTime
+        };
+      });
       db.collection('jobs')
-      .find({_id: new ObjectID(id)}, function callback(err, data){
-        console.log(err, data);
-        done(null, data);
-  });
+      .findOneAndDelete({_id: new ObjectID(id)}).then(function success(reason){
+          done(null, cleanData);
+      }, function failure(value) {
+        done(value, null);
+      });
+
 });
 
 }
